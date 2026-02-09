@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Generation\Covers\Assets\" />
+    <Folder Include="Localization\Resources\" />
+  </ItemGroup>
+
 </Project>
