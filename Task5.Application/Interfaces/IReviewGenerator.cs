@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Task5.Domain.ValueObjects;
 
 namespace Task5.Application.Interfaces;
 
-internal interface IReviewGenerator
+public interface IReviewGenerator
 {
+    string GenerateReview(Seed64 seed, LocaleCode locale);
 }

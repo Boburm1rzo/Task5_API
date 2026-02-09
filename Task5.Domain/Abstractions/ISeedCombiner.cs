@@ -1,5 +1,8 @@
-﻿namespace Task5.Domain.Abstractions;
+﻿using Task5.Domain.ValueObjects;
 
-internal interface ISeedCombiner
+namespace Task5.Domain.Abstractions;
+
+public interface ISeedCombiner
 {
+    Seed64 Combine(ulong userSeed, int page, int index, string purpose);
 }

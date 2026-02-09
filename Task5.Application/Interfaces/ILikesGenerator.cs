@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Task5.Domain.ValueObjects;
 
 namespace Task5.Application.Interfaces;
 
-internal interface ILikesGenerator
+public interface ILikesGenerator
 {
+    int GenerateLikes(Seed64 seedForLikes, LikesAverage averageLikes);
 }

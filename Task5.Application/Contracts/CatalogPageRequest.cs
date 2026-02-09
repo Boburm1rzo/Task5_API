@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Task5.Application.Contracts;
 
-namespace Task5.Application.Contracts;
-
-internal class CatalogPageRequest
-{
-}
+public sealed record CatalogPageRequest(
+    string Locale,
+    ulong Seed,
+    double LikesAvg,
+    int Page = 1,
+    int PageSize = 20);

@@ -1,5 +1,8 @@
-﻿namespace Task5.Application.Interfaces;
+﻿using Task5.Application.Contracts;
 
-internal interface ICatalogService
+namespace Task5.Application.Interfaces;
+
+public interface ICatalogService
 {
+    CatalogPageResponse GetPage(CatalogPageRequest request);
 }

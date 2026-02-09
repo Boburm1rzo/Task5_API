@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Task5.Domain.ValueObjects;
 
-namespace Task5.Domain.ValueObjects;
-
-internal class Seed64
-{
-}
+public readonly record struct Seed64(ulong Value);

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Task5.Application.Contracts;
 
-namespace Task5.Application.Contracts;
-
-internal class SongRowDto
-{
-}
+public sealed record SongRowDto(
+    int Index,
+    string Title,
+    string Artist,
+    string Album,
+    string Genre,
+    int Likes);

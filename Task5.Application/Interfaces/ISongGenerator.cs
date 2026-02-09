@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Task5.Domain.Entities;
+using Task5.Domain.ValueObjects;
 
 namespace Task5.Application.Interfaces;
 
-internal interface ISongGenerator
+public interface ISongGenerator
 {
+    Song GenerateOne(ulong seed, int page, LocaleCode locale, int index);
+    IReadOnlyList<Song> GeneratePage(ulong userSeed, int page, int pageIndex, LocaleCode locale);
 }

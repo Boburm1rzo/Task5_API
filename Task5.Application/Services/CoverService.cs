@@ -1,5 +1,11 @@
-﻿namespace Task5.Application.Services;
+﻿using Task5.Application.Interfaces;
 
-internal class CoverService
+namespace Task5.Application.Services;
+
+internal class CoverService : ICoverService
 {
+    public byte[] RenderCoverPng(string locale, ulong seed, int index)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Task5.Application.Contracts;
 
 namespace Task5.Application.Interfaces;
 
-internal interface ISongDetailsService
+public interface ISongDetailsService
 {
+    SongDetailsDto GetDetails(string baseUrl, string locale, ulong seed, double likesAvg, int index);
 }

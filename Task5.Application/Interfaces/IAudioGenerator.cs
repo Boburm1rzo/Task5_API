@@ -1,5 +1,8 @@
-﻿namespace Task5.Application.Interfaces;
+﻿using Task5.Domain.ValueObjects;
 
-internal interface IAudioGenerator
+namespace Task5.Application.Interfaces;
+
+public interface IAudioGenerator
 {
+    byte[] RenderPreviewWav(Seed64 seed, LocaleCode locale);
 }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Task5.Application.Interfaces;
 
-namespace Task5.Application.Interfaces;
-
-internal interface ICoverService
+public interface ICoverService
 {
+    byte[] RenderCoverPng(string locale, ulong seed, int index);
 }

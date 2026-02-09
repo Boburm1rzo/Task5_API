@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Task5.Domain.ValueObjects;
 
-namespace Task5.Domain.ValueObjects;
-
-internal class LocaleCode
-{
-}
+public readonly record struct LocaleCode(string Value);

@@ -1,5 +1,6 @@
 ﻿namespace Task5.Application.Interfaces;
 
-internal interface IAudioPreviewService
+public interface IAudioPreviewService
 {
+    byte[] RenderPreviewWav(string locale, ulong seed, int index);
 }
