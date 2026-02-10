@@ -1,9 +1,9 @@
 ﻿using System.Buffers.Binary;
 using Task5.Application.Interfaces;
 using Task5.Domain.ValueObjects;
-using Task5.Infrastrukture.Generation.Seeds;
+using Task5.Infrastructure.Generation.Seeds;
 
-namespace Task5.Infrastrukture.Generation.Audio;
+namespace Task5.Infrastructure.Generation.Audio;
 
 internal sealed class AudioGenerator : IAudioGenerator
 {

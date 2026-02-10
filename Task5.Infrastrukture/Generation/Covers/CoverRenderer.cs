@@ -7,9 +7,9 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using Task5.Application.Interfaces;
 using Task5.Domain.ValueObjects;
-using Task5.Infrastrukture.Generation.Seeds;
+using Task5.Infrastructure.Generation.Seeds;
 
-namespace Task5.Infrastrukture.Generation.Covers;
+namespace Task5.Infrastructure.Generation.Covers;
 
 internal sealed class CoverRenderer : ICoverRenderer
 {

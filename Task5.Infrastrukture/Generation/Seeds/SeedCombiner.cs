@@ -2,7 +2,7 @@
 using Task5.Domain.Abstractions;
 using Task5.Domain.ValueObjects;
 
-namespace Task5.Infrastrukture.Generation.Seeds;
+namespace Task5.Infrastructure.Generation.Seeds;
 
 internal sealed class SeedCombiner : ISeedCombiner
 {

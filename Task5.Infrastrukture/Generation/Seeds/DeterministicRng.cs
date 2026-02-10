@@ -1,4 +1,4 @@
-﻿namespace Task5.Infrastrukture.Generation.Seeds;
+﻿namespace Task5.Infrastructure.Generation.Seeds;
 
 public sealed class DeterministicRng
 {

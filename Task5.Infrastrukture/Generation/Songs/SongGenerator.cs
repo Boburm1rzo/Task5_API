@@ -4,7 +4,7 @@ using Task5.Domain.Abstractions;
 using Task5.Domain.Entities;
 using Task5.Domain.ValueObjects;
 
-namespace Task5.Infrastrukture.Generation.Songs;
+namespace Task5.Infrastructure.Generation.Songs;
 
 internal sealed class SongGenerator(ISeedCombiner seedCombiner) : ISongGenerator
 {

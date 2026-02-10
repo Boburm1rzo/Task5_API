@@ -1,8 +1,8 @@
 ﻿using Task5.Application.Interfaces;
 using Task5.Domain.ValueObjects;
-using Task5.Infrastrukture.Generation.Seeds;
+using Task5.Infrastructure.Generation.Seeds;
 
-namespace Task5.Infrastrukture.Generation.Songs;
+namespace Task5.Infrastructure.Generation.Songs;
 
 internal sealed class ReviewTextGenerator(ILocaleTextProvider texts) : IReviewGenerator
 {

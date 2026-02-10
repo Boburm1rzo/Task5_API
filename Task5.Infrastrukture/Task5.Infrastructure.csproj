@@ -6,9 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<None Update="Localization/Resources/*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>Resources\%(Filename)%(Extension)</TargetPath>
+		</None>
+	</ItemGroup>
+	
   <ItemGroup>
     <Folder Include="Generation\Covers\Assets\" />
-    <Folder Include="Localization\Resources\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Task5.API\Task5.API.csproj" />
     <ProjectReference Include="..\Task5.Application\Task5.Application.csproj" />
   </ItemGroup>
 

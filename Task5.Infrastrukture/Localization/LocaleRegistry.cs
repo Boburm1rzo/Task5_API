@@ -1,6 +1,6 @@
 ﻿using Task5.Application.Interfaces;
 
-namespace Task5.Infrastrukture.Localization;
+namespace Task5.Infrastructure.Localization;
 
 internal sealed class LocaleRegistry : ILocaleRegistry
 {

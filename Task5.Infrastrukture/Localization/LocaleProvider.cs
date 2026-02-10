@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Task5.Application.Interfaces;
 
-namespace Task5.Infrastrukture.Localization;
+namespace Task5.Infrastructure.Localization;
 
 internal sealed class LocaleProvider : ILocaleTextProvider
 {
@@ -30,10 +30,12 @@ internal sealed class LocaleProvider : ILocaleTextProvider
     private void LoadLocale(string locale)
     {
         var path = Path.Combine(AppContext.BaseDirectory, "Resources", $"{locale}.json");
+
         if (!File.Exists(path))
             throw new FileNotFoundException($"Locale resource not found: {path}");
 
         using var stream = File.OpenRead(path);
+
         var data = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(stream)
                    ?? throw new InvalidOperationException($"Invalid locale JSON: {locale}");
 
