@@ -8,17 +8,14 @@ namespace Task5.Infrastructure.Generation.Songs;
 
 internal sealed class SongGenerator(ISeedCombiner seedCombiner) : ISongGenerator
 {
-    public Song GenerateOne(ulong userSeed, int page, LocaleCode locale, int index)
+    public Song GenerateOne(ulong userSeed, LocaleCode locale, int index)
     {
         if (index < 1)
             throw new ArgumentOutOfRangeException(nameof(index));
 
-        if (page < 1)
-            page = 1;
+        var seed = seedCombiner.Combine(userSeed, index);
 
-        var seed = seedCombiner.Combine(userSeed, page, index, $"content|{locale.Value}");
-
-        var bogusSeed = FoldToInt(seed.Value);
+        var bogusSeed = FoldToInt(seed);
 
         var bogusLocale = ToBogusLocale(locale.Value);
         var faker = new Faker(bogusLocale)
@@ -46,7 +43,6 @@ internal sealed class SongGenerator(ISeedCombiner seedCombiner) : ISongGenerator
 
     public IReadOnlyList<Song> GeneratePage(ulong userSeed, int page, int pageSize, LocaleCode locale)
     {
-        page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
         int startIndex = (page - 1) * pageSize + 1;
@@ -55,7 +51,7 @@ internal sealed class SongGenerator(ISeedCombiner seedCombiner) : ISongGenerator
         for (int i = 0; i < pageSize; i++)
         {
             var index = startIndex + i;
-            list.Add(GenerateOne(userSeed, page, locale, index));
+            list.Add(GenerateOne(userSeed, locale, index));
         }
 
         return list;

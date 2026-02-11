@@ -5,6 +5,6 @@ namespace Task5.Application.Interfaces;
 
 public interface ISongGenerator
 {
-    Song GenerateOne(ulong seed, int page, LocaleCode locale, int index);
+    Song GenerateOne(ulong seed, LocaleCode locale, int index);
     IReadOnlyList<Song> GeneratePage(ulong userSeed, int page, int pageIndex, LocaleCode locale);
 }

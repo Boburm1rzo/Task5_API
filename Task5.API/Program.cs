@@ -5,11 +5,13 @@ using Task5.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddApi();
+builder.Services.AddApi(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
 var app = builder.Build();
+
+app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {
