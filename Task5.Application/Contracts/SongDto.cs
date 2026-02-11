@@ -1,6 +1,6 @@
 ﻿namespace Task5.Application.Contracts;
 
-public sealed record SongDetailsDto(
+public sealed record SongDto(
     int Index,
     string Title,
     string Artist,
@@ -9,7 +9,4 @@ public sealed record SongDetailsDto(
     int Likes,
     string CoverUrl,
     string PreviewUrl,
-    string LyricsUrl,
-    string Review,
-    int DurationSeconds,
-    string ReleaseYear);
+    string DetailsUrl);
