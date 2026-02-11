@@ -2,12 +2,13 @@
 
 namespace Task5.Application.Interfaces;
 
-public interface ISongDetailsService
+public interface ISongGenerationService
 {
-    SongDetailsDto GetDetails(
+    SongsPageResponse GeneratePage(
         string baseUrl,
         string locale,
         ulong seed,
         double likesAvg,
-        int index);
+        int page,
+        int pageSize);
 }
