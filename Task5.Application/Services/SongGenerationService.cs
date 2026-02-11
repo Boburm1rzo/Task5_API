@@ -1,61 +1,78 @@
-﻿using Bogus;
+﻿namespace Task5.Application.Services;
+
+using Bogus;
 using Task5.Application.Contracts;
 using Task5.Application.Interfaces;
 using Task5.Domain.Abstractions;
 using Task5.Domain.Entities;
 
-namespace Task5.Application.Services;
-
-
-public sealed class SongDetailsService(
+public sealed class SongGenerationService(
     ILocaleDataProvider localeDataProvider,
-    ISeedCombiner seedCombiner) : ISongDetailsService
+    ISeedCombiner seedCombiner) : ISongGenerationService
 {
-    public SongDetailsDto GetDetails(
+    public SongsPageResponse GeneratePage(
         string baseUrl,
         string locale,
         ulong seed,
         double likesAvg,
-        int index)
+        int page,
+        int pageSize)
     {
-        if (index < 1)
-            throw new ArgumentOutOfRangeException(nameof(index), "Index must be at least 1");
+        ValidateParameters(locale, likesAvg, page, pageSize);
 
-        // Calculate which page this song belongs to (assuming pageSize = 20)
-        const int pageSize = 20;
-        var page = (index - 1) / pageSize + 1;
         var effectiveSeed = seedCombiner.Combine(seed, page);
 
+        // Get locale-specific data
         var localeData = localeDataProvider.GetLocaleData(locale);
+
+        // Create Faker with effective seed and locale
         var faker = new Faker(localeData.BogusLocale);
         Randomizer.Seed = new Random((int)effectiveSeed);
 
-        // Skip to the correct song in the page
-        var positionInPage = (index - 1) % pageSize;
-        for (int i = 0; i < positionInPage; i++)
+        var songs = new List<SongDto>();
+
+        for (int i = 0; i < pageSize; i++)
         {
-            // Advance the random state to match the song's position
-            _ = faker.Random.Int();
-            _ = faker.Random.String2(10);
+            var globalIndex = (page - 1) * pageSize + i + 1;
+            var song = GenerateSong(faker, localeData, globalIndex, likesAvg, baseUrl);
+            songs.Add(song);
         }
 
-        // Generate the song data (same as in SongGenerationService)
+        return new SongsPageResponse
+        (
+            page,
+            pageSize,
+            songs
+        );
+    }
+
+    private SongDto GenerateSong(
+        Faker faker,
+        LocaleData localeData,
+        int index,
+        double likesAvg,
+        string baseUrl)
+    {
+        // Generate song title
         var title = GenerateSongTitle(faker, localeData);
+
+        // Generate artist (mix of band names and personal names)
         var artist = faker.Random.Bool(0.6f)
             ? GenerateBandName(faker, localeData)
             : faker.Name.FullName();
+
+        // Generate album or "Single"
         var album = faker.Random.Bool(0.3f)
             ? "Single"
             : GenerateAlbumTitle(faker, localeData);
+
+        // Pick random genre from locale data
         var genre = faker.PickRandom(localeData.Genres);
+
+        // Calculate likes probabilistically
         var likes = CalculateLikes(faker, likesAvg);
 
-        // Generate additional details
-        var review = GenerateReview(faker, title, artist, genre);
-        var durationSeconds = faker.Random.Int(120, 360); // 2-6 minutes
-        var releaseYear = faker.Random.Int(1960, 2024).ToString();
-
-        return new SongDetailsDto
+        return new SongDto
         (
             index,
             title,
@@ -65,15 +82,12 @@ public sealed class SongDetailsService(
             likes,
             $"{baseUrl}/api/songs/{index}/cover",
             $"{baseUrl}/api/songs/{index}/preview",
-            $"{baseUrl}/api/songs/{index}/lyrics",
-            review,
-            durationSeconds,
-            releaseYear
-        );
+            $"{baseUrl}/api/songs/{index}");
     }
 
     private string GenerateSongTitle(Faker faker, LocaleData localeData)
     {
+        // Various patterns for song titles
         var patterns = new[]
         {
             () => $"{faker.PickRandom(localeData.Adjectives)} {faker.PickRandom(localeData.Nouns)}",
@@ -88,6 +102,7 @@ public sealed class SongDetailsService(
 
     private string GenerateBandName(Faker faker, LocaleData localeData)
     {
+        // Various patterns for band names
         var patterns = new[]
         {
             () => $"The {faker.PickRandom(localeData.Nouns)}",
@@ -102,6 +117,7 @@ public sealed class SongDetailsService(
 
     private string GenerateAlbumTitle(Faker faker, LocaleData localeData)
     {
+        // Similar to song titles but different patterns
         var patterns = new[]
         {
             () => $"{faker.PickRandom(localeData.Nouns)} {faker.PickRandom(localeData.Nouns)}",
@@ -115,6 +131,11 @@ public sealed class SongDetailsService(
 
     private int CalculateLikes(Faker faker, double likesAvg)
     {
+        // Probabilistic calculation for fractional likes
+        // Example: likesAvg = 3.7
+        // base = 3, fraction = 0.7
+        // 70% chance of 4 likes, 30% chance of 3 likes
+
         var baseValue = (int)Math.Floor(likesAvg);
         var fraction = likesAvg - baseValue;
 
@@ -123,17 +144,18 @@ public sealed class SongDetailsService(
             : baseValue;
     }
 
-    private string GenerateReview(Faker faker, string title, string artist, string genre)
+    private void ValidateParameters(string locale, double likesAvg, int page, int pageSize)
     {
-        var reviewTemplates = new[]
-        {
-            $"'{title}' by {artist} is a masterpiece of {genre}. The composition showcases incredible talent and innovation.",
-            $"{artist}'s latest work '{title}' pushes the boundaries of {genre} in exciting new directions.",
-            $"A captivating {genre} track, '{title}' demonstrates why {artist} remains at the forefront of the music scene.",
-            $"'{title}' is a bold statement from {artist}, blending traditional {genre} elements with modern production.",
-            $"This {genre} gem '{title}' by {artist} is sure to become a classic. Highly recommended!",
-        };
+        if (string.IsNullOrWhiteSpace(locale))
+            throw new ArgumentException("Locale cannot be empty", nameof(locale));
 
-        return faker.PickRandom(reviewTemplates);
+        if (likesAvg < 0 || likesAvg > 10)
+            throw new ArgumentOutOfRangeException(nameof(likesAvg), "Likes average must be between 0 and 10");
+
+        if (page < 1)
+            throw new ArgumentOutOfRangeException(nameof(page), "Page must be at least 1");
+
+        if (pageSize < 1 || pageSize > 100)
+            throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be between 1 and 100");
     }
 }
