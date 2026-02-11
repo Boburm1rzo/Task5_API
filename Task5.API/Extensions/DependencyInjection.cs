@@ -5,7 +5,7 @@ namespace Task5.API.Extensions;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApi(this IServiceCollection services)
+    public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers()
             .ConfigureApiBehaviorOptions(options =>
@@ -26,6 +26,21 @@ public static class DependencyInjection
             c.SupportNonNullableReferenceTypes();
 
             c.CustomSchemaIds(type => type.FullName);
+        });
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("MusicStoreCors", policy =>
+            {
+                var allowedOrigins = configuration
+                    .GetSection("CorsPolicy:AllowedOrigins")
+                    .Get<string[]>() ?? Array.Empty<string>();
+
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
         });
 
         return services;
