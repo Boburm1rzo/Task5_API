@@ -12,7 +12,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-
         services.AddScoped<ISeedCombiner, SeedCombiner>();
         services.AddScoped<ISongGenerator, SongGenerator>();
         services.AddScoped<IAudioPreviewService, AudioPreviewService>();
@@ -22,7 +21,6 @@ public static class DependencyInjection
         services.AddScoped<ISongGenerationService, SongGenerationService>();
         services.AddScoped<ICoverService, CoverService>();
         services.AddScoped<IExportService, ExportService>();
-
 
         return services;
     }

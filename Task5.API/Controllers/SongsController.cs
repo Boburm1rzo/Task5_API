@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Task5.Application.Contracts;
 using Task5.Application.Interfaces;
 
 namespace Task5.API.Controllers;
@@ -14,7 +15,6 @@ public sealed class SongsController(
     ILyricsService lyricsService,
     IExportService exportService) : ControllerBase
 {
-    // ✅ 1. LIST endpoint - Eng muhim!
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -45,7 +45,6 @@ public sealed class SongsController(
         }
     }
 
-    // ✅ 2. DETAILS endpoint - bitta song uchun
     [HttpGet("{index:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -74,7 +73,6 @@ public sealed class SongsController(
         }
     }
 
-    // ✅ 3. COVER endpoint
     [HttpGet("{index:int}/cover")]
     [Produces("image/png")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -82,11 +80,12 @@ public sealed class SongsController(
     public IActionResult GetCover(
         [FromRoute, Range(1, int.MaxValue)] int index,
         [FromQuery] string locale = "en",
-        [FromQuery] ulong seed = 1)
+        [FromQuery] ulong seed = 1,
+        [FromQuery] int size = 256)
     {
         try
         {
-            var png = coverService.RenderCoverPng(locale, seed, index);
+            var png = coverService.RenderCoverPng(locale, seed, index, size);
             return File(png, "image/png");
         }
         catch (Exception ex) when (
@@ -102,7 +101,6 @@ public sealed class SongsController(
         }
     }
 
-    // ✅ 4. PREVIEW endpoint
     [HttpGet("{index:int}/preview")]
     [Produces("audio/wav")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -130,7 +128,6 @@ public sealed class SongsController(
         }
     }
 
-    // ✅ 5. LYRICS endpoint - Task requirement!
     [HttpGet("{index:int}/lyrics")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -157,7 +154,6 @@ public sealed class SongsController(
         }
     }
 
-    // ✅ 6. EXPORT endpoint - Optional, lekin yuqori ball uchun
     [HttpPost("export")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -186,8 +182,3 @@ public sealed class SongsController(
         }
     }
 }
-
-public record ExportRequest(
-    string Locale,
-    ulong Seed,
-    int[] SongIndices);

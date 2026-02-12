@@ -2,5 +2,5 @@
 
 public interface ICoverService
 {
-    byte[] RenderCoverPng(string locale, ulong seed, int index);
+    byte[] RenderCoverPng(string locale, ulong seed, int index, int size = 256);
 }

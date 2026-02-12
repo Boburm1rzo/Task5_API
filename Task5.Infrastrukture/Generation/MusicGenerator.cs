@@ -11,7 +11,6 @@ public sealed class MusicGenerator : IMusicGenerator
     private static readonly int[][] PentatonicScale = [[0, 2, 4, 7, 9]];
     private static readonly int[][] BluesScale = [[0, 3, 5, 6, 7, 10]];
 
-    // Common chord progressions
     private static readonly int[][] ChordProgressions =
     [
         [0, 3, 4, 0],
@@ -24,9 +23,8 @@ public sealed class MusicGenerator : IMusicGenerator
     {
         var random = new Random((int)seed);
 
-        // Generate musical parameters
-        var tempo = random.Next(80, 140); // 80-140 BPM
-        var key = random.Next(0, 12);     // C to B
+        var tempo = random.Next(80, 140);
+        var key = random.Next(0, 12);
         var scaleType = (ScaleType)random.Next(0, 4);
 
         var scale = GetScale(scaleType);
@@ -34,22 +32,20 @@ public sealed class MusicGenerator : IMusicGenerator
 
         var notes = new List<Note>();
 
-        // Generate melody over chord progression
         var currentBeat = 0.0;
 
         foreach (var chordDegree in progression)
         {
             var chordNotes = GetChordNotes(key, scale[0], chordDegree);
 
-            // Generate melody notes for this chord (4 beats)
             for (int i = 0; i < 4; i++)
             {
-                var shouldPlayNote = random.NextDouble() > 0.2; // 80% chance
+                var shouldPlayNote = random.NextDouble() > 0.2;
                 if (shouldPlayNote)
                 {
                     var noteIndex = random.Next(chordNotes.Length);
-                    var midiNote = chordNotes[noteIndex] + 60; // Middle octave
-                    var duration = random.NextDouble() < 0.5 ? 0.5 : 1.0; // Half or whole beat
+                    var midiNote = chordNotes[noteIndex] + 60;
+                    var duration = random.NextDouble() < 0.5 ? 0.5 : 1.0;
                     var velocity = random.Next(60, 100);
 
                     notes.Add(new Note
@@ -64,11 +60,11 @@ public sealed class MusicGenerator : IMusicGenerator
             }
         }
 
-        // Add bass line
         currentBeat = 0.0;
         foreach (var chordDegree in progression)
         {
-            var bassNote = key + scale[0][chordDegree] + 36; // Low octave
+            var degreeIndex = SafeDegree(chordDegree, scale[0].Length);
+            var bassNote = key + scale[0][degreeIndex] + 36;
 
             for (int i = 0; i < 4; i++)
             {
@@ -83,15 +79,14 @@ public sealed class MusicGenerator : IMusicGenerator
             }
         }
 
-        // Add harmony notes
         currentBeat = 0.0;
         foreach (var chordDegree in progression)
         {
             var chordNotes = GetChordNotes(key, scale[0], chordDegree);
 
-            for (int i = 0; i < 2; i++) // Play chord twice per 4 beats
+            for (int i = 0; i < 2; i++)
             {
-                foreach (var note in chordNotes.Take(3)) // Play triad
+                foreach (var note in chordNotes.Take(3))
                 {
                     notes.Add(new Note
                     (
@@ -129,10 +124,21 @@ public sealed class MusicGenerator : IMusicGenerator
 
     private int[] GetChordNotes(int key, int[] scale, int degree)
     {
-        var root = key + scale[degree % scale.Length];
-        var third = key + scale[(degree + 2) % scale.Length];
-        var fifth = key + scale[(degree + 4) % scale.Length];
+        var d0 = SafeDegree(degree, scale.Length);
+        var d2 = SafeDegree(degree + 2, scale.Length);
+        var d4 = SafeDegree(degree + 4, scale.Length);
+
+        var root = key + scale[d0];
+        var third = key + scale[d2];
+        var fifth = key + scale[d4];
 
         return [root, third, fifth];
+    }
+
+    private static int SafeDegree(int degree, int scaleLen)
+    {
+        if (scaleLen <= 0) return 0;
+        var m = degree % scaleLen;
+        return m < 0 ? m + scaleLen : m;
     }
 }

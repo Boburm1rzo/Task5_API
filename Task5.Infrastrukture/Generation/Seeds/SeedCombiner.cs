@@ -9,10 +9,6 @@ internal sealed class SeedCombiner : ISeedCombiner
 
     public ulong Combine(ulong userSeed, int pageOrIndex)
     {
-        // MAD (Multiply-Add-Divide) operation
-        // This ensures same seed + same page always produces same result
-        // but different pages produce different results
-
         unchecked
         {
             var combined = userSeed * Multiplier;

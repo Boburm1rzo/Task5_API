@@ -115,7 +115,6 @@ public sealed class LocaleDataProvider : ILocaleDataProvider
         if (string.IsNullOrWhiteSpace(localeCode))
             throw new ArgumentException("Locale code cannot be empty", nameof(localeCode));
 
-        // Try to get from cache
         var cacheKey = $"locale_{localeCode}";
         if (_cache.TryGetValue<LocaleData>(cacheKey, out var cachedData))
         {
@@ -123,7 +122,6 @@ public sealed class LocaleDataProvider : ILocaleDataProvider
             return cachedData!;
         }
 
-        // Load from file
         var filePath = Path.Combine(_localesDirectory, $"{localeCode}.json");
 
         _logger?.LogDebug("Looking for locale file: {FilePath}", filePath);
@@ -150,11 +148,19 @@ public sealed class LocaleDataProvider : ILocaleDataProvider
                 data.Adjectives,
                 data.Nouns,
                 data.Verbs,
-                data.Genres
+                data.Genres,
+                data.BandSuffixes,
+                data.Djs,
+                data.AlbumSingles,
+                data.ReviewTemplates,
+                data.SectionLabels
             );
 
-            // Cache for 1 hour
-            _cache.Set(cacheKey, localeData, TimeSpan.FromHours(1));
+            _cache.Set(cacheKey, localeData, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                Size = 1
+            });
 
             _logger?.LogInformation("Loaded locale '{Locale}' from {FilePath}", localeCode, filePath);
 

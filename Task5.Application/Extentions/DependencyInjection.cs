@@ -16,10 +16,8 @@ public static class DependencyInjection
         services.AddScoped<ILyricsService, LyricsService>();
         services.AddScoped<IExportService, ExportService>();
 
-        // Register helpers
         services.AddSingleton<ILocaleDataProvider, LocaleDataProvider>();
 
-        // Add memory cache for locale data
         services.AddMemoryCache();
 
         return services;

@@ -43,6 +43,8 @@ public static class DependencyInjection
             });
         });
 
+        services.AddMemoryCache(o => { o.SizeLimit = 50 * 1024 * 1024; });
+
         return services;
     }
 }

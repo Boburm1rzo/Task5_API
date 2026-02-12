@@ -6,13 +6,9 @@ using Task5.Application.Interfaces;
 using Task5.Domain.Abstractions;
 using Task5.Domain.Entities;
 
-/// <summary>
-/// Implementation of lyrics service
-/// </summary>
 public sealed class LyricsService(
     ILocaleDataProvider localeDataProvider,
-    ISeedCombiner seedCombiner,
-    ISongDetailsService songDetailsService) : ILyricsService
+    ISeedCombiner seedCombiner) : ILyricsService
 {
     public LyricsDto GenerateLyrics(string locale, ulong seed, int index)
     {
@@ -24,26 +20,19 @@ public sealed class LyricsService(
         var faker = new Faker(localeData.BogusLocale);
         Randomizer.Seed = new Random((int)effectiveSeed);
 
-        // Get song details for context
-        var details = songDetailsService.GetDetails(string.Empty, locale, seed, 0, index);
-
         var lines = new List<LyricLine>();
-        var currentTime = 0.5; // Start after 0.5 seconds
+        var currentTime = 0.5;
 
-        // Generate verse 1
         lines.AddRange(GenerateVerse(faker, localeData, ref currentTime, "Verse 1"));
-        currentTime += 1.0; // Pause
+        currentTime += 1.0;
 
-        // Generate chorus
         var chorusLines = GenerateChorus(faker, localeData, ref currentTime);
         lines.AddRange(chorusLines);
-        currentTime += 1.0; // Pause
+        currentTime += 1.0;
 
-        // Generate verse 2
         lines.AddRange(GenerateVerse(faker, localeData, ref currentTime, "Verse 2"));
-        currentTime += 1.0; // Pause
+        currentTime += 1.0;
 
-        // Repeat chorus
         lines.AddRange(GenerateChorus(faker, localeData, ref currentTime));
 
         return new LyricsDto(lines);
@@ -62,7 +51,7 @@ public sealed class LyricsService(
         {
             var line = GenerateLyricLine(faker, localeData);
             lines.Add(new LyricLine(currentTime, line));
-            currentTime += 2.5; // ~2.5 seconds per line
+            currentTime += 2.5;
         }
 
         return lines;
@@ -77,7 +66,7 @@ public sealed class LyricsService(
         currentTime += 0.5;
 
         var lineCount = faker.Random.Int(3, 4);
-        var chorusLine = GenerateLyricLine(faker, localeData); // Repeat same line
+        var chorusLine = GenerateLyricLine(faker, localeData);
 
         for (int i = 0; i < lineCount; i++)
         {
@@ -90,7 +79,6 @@ public sealed class LyricsService(
 
     private string GenerateLyricLine(Faker faker, LocaleData localeData)
     {
-        // Generate poetic-sounding lines
         var patterns = new[]
         {
             () => $"{faker.PickRandom(localeData.Adjectives)} {faker.PickRandom(localeData.Nouns)} in the {faker.PickRandom(localeData.Nouns)}",

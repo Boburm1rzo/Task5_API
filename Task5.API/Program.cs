@@ -4,7 +4,6 @@ using Task5.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddApi(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
@@ -20,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Task5 API v1");
-        c.RoutePrefix = "swagger"; // default
+        c.RoutePrefix = "swagger";
     });
 }
 

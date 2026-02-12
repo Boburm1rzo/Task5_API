@@ -21,7 +21,6 @@ public sealed class SongDetailsService(
         if (index < 1)
             throw new ArgumentOutOfRangeException(nameof(index), "Index must be at least 1");
 
-        // Calculate which page this song belongs to (assuming pageSize = 20)
         const int pageSize = 20;
         var page = (index - 1) / pageSize + 1;
         var effectiveSeed = seedCombiner.Combine(seed, page);
@@ -30,16 +29,13 @@ public sealed class SongDetailsService(
         var faker = new Faker(localeData.BogusLocale);
         Randomizer.Seed = new Random((int)effectiveSeed);
 
-        // Skip to the correct song in the page
         var positionInPage = (index - 1) % pageSize;
         for (int i = 0; i < positionInPage; i++)
         {
-            // Advance the random state to match the song's position
             _ = faker.Random.Int();
             _ = faker.Random.String2(10);
         }
 
-        // Generate the song data (same as in SongGenerationService)
         var title = GenerateSongTitle(faker, localeData);
         var artist = faker.Random.Bool(0.6f)
             ? GenerateBandName(faker, localeData)
@@ -50,9 +46,8 @@ public sealed class SongDetailsService(
         var genre = faker.PickRandom(localeData.Genres);
         var likes = CalculateLikes(faker, likesAvg);
 
-        // Generate additional details
-        var review = GenerateReview(faker, title, artist, genre);
-        var durationSeconds = faker.Random.Int(120, 360); // 2-6 minutes
+        var review = GenerateReview(faker, localeData, title, artist, genre);
+        var durationSeconds = faker.Random.Int(120, 360);
         var releaseYear = faker.Random.Int(1960, 2024).ToString();
 
         return new SongDetailsDto
@@ -63,9 +58,9 @@ public sealed class SongDetailsService(
             album,
             genre,
             likes,
-            $"{baseUrl}/api/songs/{index}/cover",
-            $"{baseUrl}/api/songs/{index}/preview",
-            $"{baseUrl}/api/songs/{index}/lyrics",
+            $"/api/songs/{index}/cover?locale={locale}&seed={seed}",
+            $"/api/songs/{index}/preview?locale={locale}&seed={seed}",
+            $"/api/songs/{index}/lyrics?locale={locale}&seed={seed}",
             review,
             durationSeconds,
             releaseYear
@@ -93,8 +88,8 @@ public sealed class SongDetailsService(
             () => $"The {faker.PickRandom(localeData.Nouns)}",
             () => $"{faker.PickRandom(localeData.Adjectives)} {faker.PickRandom(localeData.Nouns)}",
             () => faker.Name.LastName(),
-            () => $"{faker.Name.LastName()} {faker.PickRandom(new[] { "Band", "Group", "Orchestra", "Ensemble" })}",
-            () => $"DJ {faker.Name.FirstName()}",
+            () => $"{faker.Name.LastName()} {faker.PickRandom(localeData.BandSuffixes)}",
+            () => $"{faker.PickRandom(localeData.Djs)} {faker.Name.FirstName()}",
         };
 
         return faker.PickRandom(patterns)();
@@ -123,17 +118,13 @@ public sealed class SongDetailsService(
             : baseValue;
     }
 
-    private string GenerateReview(Faker faker, string title, string artist, string genre)
+    private string GenerateReview(Faker faker, LocaleData localeData, string title, string artist, string genre)
     {
-        var reviewTemplates = new[]
-        {
-            $"'{title}' by {artist} is a masterpiece of {genre}. The composition showcases incredible talent and innovation.",
-            $"{artist}'s latest work '{title}' pushes the boundaries of {genre} in exciting new directions.",
-            $"A captivating {genre} track, '{title}' demonstrates why {artist} remains at the forefront of the music scene.",
-            $"'{title}' is a bold statement from {artist}, blending traditional {genre} elements with modern production.",
-            $"This {genre} gem '{title}' by {artist} is sure to become a classic. Highly recommended!",
-        };
+        var template = faker.PickRandom(localeData.ReviewTemplates);
 
-        return faker.PickRandom(reviewTemplates);
+        return template
+            .Replace("{title}", title)
+            .Replace("{artist}", artist)
+            .Replace("{genre}", genre);
     }
 }

@@ -1,67 +1,63 @@
-﻿using SkiaSharp;
+﻿using Microsoft.Extensions.Caching.Memory;
+using SkiaSharp;
 using Task5.Application.Interfaces;
 using Task5.Domain.Abstractions;
 
 namespace Task5.Application.Services;
 
-
-/// <summary>
-/// Implementation of cover service using SkiaSharp for image generation
-/// </summary>
 public sealed class CoverService(
-    ISeedCombiner seedCombiner,
-    ISongDetailsService songDetailsService) : ICoverService
+    IMemoryCache cache,
+    ISeedCombiner seedCombiner) : ICoverService
 {
-    public byte[] RenderCoverPng(string locale, ulong seed, int index)
+    public byte[] RenderCoverPng(string locale, ulong seed, int index, int size = 256)
     {
         if (index < 1)
             throw new ArgumentOutOfRangeException(nameof(index), "Index must be at least 1");
 
-        // Get song details to render on cover
-        var details = songDetailsService.GetDetails(string.Empty, locale, seed, 0, index);
+        size = Math.Clamp(size, 128, 800);
 
-        // Calculate effective seed for this specific cover
+        var cacheKey = $"cover:{locale}:{seed}:{index}:{size}";
+        if (cache.TryGetValue(cacheKey, out byte[]? cached) && cached is not null)
+            return cached;
+
         var effectiveSeed = seedCombiner.Combine(seed, index);
-        var random = new Random((int)effectiveSeed);
+        var random = new Random(unchecked((int)effectiveSeed));
 
-        // Create image
-        const int width = 800;
-        const int height = 800;
+        var width = size;
+        var height = size;
 
         using var surface = SKSurface.Create(new SKImageInfo(width, height));
         var canvas = surface.Canvas;
 
-        // Draw background
         DrawBackground(canvas, random, width, height);
 
-        // Draw album title
-        DrawText(canvas, details.Album == "Single" ? details.Title : details.Album,
-            width / 2, height * 0.4f, 60, SKColors.White);
+        if (size >= 512)
+        {
+            var title = $"Track {index}";
+            var artist = "Unknown Artist";
 
-        // Draw artist name
-        DrawText(canvas, details.Artist,
-            width / 2, height * 0.6f, 40, SKColors.LightGray);
+            DrawText(canvas, title, width / 2f, height * 0.42f, width * 0.07f, SKColors.White);
+            DrawText(canvas, artist, width / 2f, height * 0.60f, width * 0.05f, SKColors.LightGray);
+        }
 
-        // Encode to PNG
         using var image = surface.Snapshot();
-        using var data = image.Encode(SKEncodedImageFormat.Png, 90);
-        return data.ToArray();
+        using var data = image.Encode(SKEncodedImageFormat.Png, 85);
+        var bytes = data.ToArray();
+
+        cache.Set(cacheKey, bytes, new MemoryCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(20),
+            Size = bytes.Length
+        });
+
+        return bytes;
     }
 
     private void DrawBackground(SKCanvas canvas, Random random, int width, int height)
     {
-        // Generate random gradient colors
-        var color1 = SKColor.FromHsv(
-            random.Next(0, 360),
-            random.Next(40, 100),
-            random.Next(40, 80));
+        var color1 = SKColor.FromHsv(random.Next(0, 360), random.Next(40, 100), random.Next(40, 80));
+        var color2 = SKColor.FromHsv(random.Next(0, 360), random.Next(40, 100), random.Next(40, 80));
 
-        var color2 = SKColor.FromHsv(
-            random.Next(0, 360),
-            random.Next(40, 100),
-            random.Next(40, 80));
-
-        // Create gradient
         using var paint = new SKPaint
         {
             Shader = SKShader.CreateLinearGradient(
@@ -72,64 +68,41 @@ public sealed class CoverService(
         };
 
         canvas.DrawRect(0, 0, width, height, paint);
-
-        // Add some random geometric shapes for visual interest
         DrawRandomShapes(canvas, random, width, height);
     }
 
     private void DrawRandomShapes(SKCanvas canvas, Random random, int width, int height)
     {
-        var shapeCount = random.Next(3, 8);
-
+        var shapeCount = random.Next(3, 7);
         for (int i = 0; i < shapeCount; i++)
         {
-            var color = SKColor.FromHsv(
-                random.Next(0, 360),
-                random.Next(20, 60),
-                random.Next(50, 90));
+            var color = SKColor.FromHsv(random.Next(0, 360), random.Next(20, 60), random.Next(50, 90));
 
             using var paint = new SKPaint
             {
-                Color = color.WithAlpha((byte)random.Next(30, 100)),
+                Color = color.WithAlpha((byte)random.Next(35, 110)),
                 Style = SKPaintStyle.Fill,
                 IsAntialias = true
             };
 
-            var shapeType = random.Next(3);
-            switch (shapeType)
+            switch (random.Next(3))
             {
-                case 0: // Circle
-                    canvas.DrawCircle(
-                        random.Next(0, width),
-                        random.Next(0, height),
-                        random.Next(50, 200),
-                        paint);
+                case 0:
+                    canvas.DrawCircle(random.Next(0, width), random.Next(0, height), random.Next(width / 14, width / 4), paint);
                     break;
-
-                case 1: // Rectangle
-                    canvas.DrawRect(
-                        random.Next(0, width),
-                        random.Next(0, height),
-                        random.Next(100, 300),
-                        random.Next(100, 300),
-                        paint);
+                case 1:
+                    canvas.DrawRect(random.Next(0, width), random.Next(0, height), random.Next(width / 6, width / 2), random.Next(width / 6, width / 2), paint);
                     break;
-
-                case 2: // Line
+                case 2:
                     using (var linePaint = new SKPaint
                     {
-                        Color = color.WithAlpha((byte)random.Next(50, 150)),
+                        Color = color.WithAlpha((byte)random.Next(60, 160)),
                         Style = SKPaintStyle.Stroke,
-                        StrokeWidth = random.Next(5, 20),
+                        StrokeWidth = random.Next(2, Math.Max(3, width / 60)),
                         IsAntialias = true
                     })
                     {
-                        canvas.DrawLine(
-                            random.Next(0, width),
-                            random.Next(0, height),
-                            random.Next(0, width),
-                            random.Next(0, height),
-                            linePaint);
+                        canvas.DrawLine(random.Next(0, width), random.Next(0, height), random.Next(0, width), random.Next(0, height), linePaint);
                     }
                     break;
             }
@@ -141,26 +114,18 @@ public sealed class CoverService(
         using var typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold);
         using var font = new SKFont(typeface, fontSize);
 
-        using var paint = new SKPaint
-        {
-            Color = color,
-            IsAntialias = true
-        };
-
+        using var paint = new SKPaint { Color = color, IsAntialias = true };
         var textWidth = paint.MeasureText(text);
         var adjustedX = x - textWidth / 2;
 
-        // Draw shadow first
         using var shadowPaint = new SKPaint
         {
-            Color = SKColors.Black.WithAlpha(150),
+            Color = SKColors.Black.WithAlpha(130),
             IsAntialias = true,
-            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 5)
+            MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4)
         };
 
         canvas.DrawText(text, adjustedX + 2, y + 2, font, shadowPaint);
-
-        // Draw main text
         canvas.DrawText(text, adjustedX, y, font, paint);
     }
 }
