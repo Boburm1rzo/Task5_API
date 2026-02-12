@@ -147,5 +147,16 @@
     "Trance",
     "Dubstep",
     "Trap"
-  ]
+  ],
+  "BandSuffixes": [ "Band", "Group", "Orchestra", "Ensemble" ],
+  "Djs": [ "DJ" ],
+  "AlbumSingles": [ "Single" ],
+
+  "ReviewTemplates": [
+    "'{title}' by {artist} is a masterpiece of {genre}. The composition feels fresh and confident.",
+    "{artist}'s '{title}' pushes {genre} forward with a clean hook and strong momentum.",
+    "A captivating {genre} track, '{title}' shows why {artist} keeps evolving."
+  ],
+
+  "SectionLabels": [ "Verse 1", "Verse 2", "Chorus" ]
 }
