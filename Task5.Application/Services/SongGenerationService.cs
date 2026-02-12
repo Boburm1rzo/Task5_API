@@ -22,10 +22,8 @@ public sealed class SongGenerationService(
 
         var effectiveSeed = seedCombiner.Combine(seed, page);
 
-        // Get locale-specific data
         var localeData = localeDataProvider.GetLocaleData(locale);
 
-        // Create Faker with effective seed and locale
         var faker = new Faker(localeData.BogusLocale);
         Randomizer.Seed = new Random((int)effectiveSeed);
 
@@ -53,23 +51,18 @@ public sealed class SongGenerationService(
         double likesAvg,
         string baseUrl)
     {
-        // Generate song title
         var title = GenerateSongTitle(faker, localeData);
 
-        // Generate artist (mix of band names and personal names)
         var artist = faker.Random.Bool(0.6f)
             ? GenerateBandName(faker, localeData)
             : faker.Name.FullName();
 
-        // Generate album or "Single"
         var album = faker.Random.Bool(0.3f)
-            ? "Single"
+            ? faker.PickRandom(localeData.AlbumSingles)
             : GenerateAlbumTitle(faker, localeData);
 
-        // Pick random genre from locale data
         var genre = faker.PickRandom(localeData.Genres);
 
-        // Calculate likes probabilistically
         var likes = CalculateLikes(faker, likesAvg);
 
         return new SongDto
@@ -87,7 +80,6 @@ public sealed class SongGenerationService(
 
     private string GenerateSongTitle(Faker faker, LocaleData localeData)
     {
-        // Various patterns for song titles
         var patterns = new[]
         {
             () => $"{faker.PickRandom(localeData.Adjectives)} {faker.PickRandom(localeData.Nouns)}",
@@ -102,14 +94,13 @@ public sealed class SongGenerationService(
 
     private string GenerateBandName(Faker faker, LocaleData localeData)
     {
-        // Various patterns for band names
         var patterns = new[]
         {
             () => $"The {faker.PickRandom(localeData.Nouns)}",
             () => $"{faker.PickRandom(localeData.Adjectives)} {faker.PickRandom(localeData.Nouns)}",
             () => faker.Name.LastName(),
-            () => $"{faker.Name.LastName()} {faker.PickRandom(new[] { "Band", "Group", "Orchestra", "Ensemble" })}",
-            () => $"DJ {faker.Name.FirstName()}",
+            () => $"{faker.Name.LastName()} {faker.PickRandom(localeData.BandSuffixes)}",
+            () => $"{faker.PickRandom(localeData.Djs)} {faker.Name.FirstName()}",
         };
 
         return faker.PickRandom(patterns)();
@@ -117,7 +108,6 @@ public sealed class SongGenerationService(
 
     private string GenerateAlbumTitle(Faker faker, LocaleData localeData)
     {
-        // Similar to song titles but different patterns
         var patterns = new[]
         {
             () => $"{faker.PickRandom(localeData.Nouns)} {faker.PickRandom(localeData.Nouns)}",
@@ -131,11 +121,6 @@ public sealed class SongGenerationService(
 
     private int CalculateLikes(Faker faker, double likesAvg)
     {
-        // Probabilistic calculation for fractional likes
-        // Example: likesAvg = 3.7
-        // base = 3, fraction = 0.7
-        // 70% chance of 4 likes, 30% chance of 3 likes
-
         var baseValue = (int)Math.Floor(likesAvg);
         var fraction = likesAvg - baseValue;
 
