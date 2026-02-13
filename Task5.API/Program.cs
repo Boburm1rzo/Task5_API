@@ -10,7 +10,7 @@ builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
-app.UseCors("DevCors");
+app.UseCors("MusicStoreCors");
 
 if (app.Environment.IsDevelopment())
 {
